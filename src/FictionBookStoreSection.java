@@ -6,10 +6,12 @@ public class FictionBookStoreSection extends BookStoreSection{
         super(timer);
     }
 
+    @Override
     public BookCategory getBookStoreSectionCategory() {
         return BookCategory.FICTION;
     }
 
+    @Override
     public void getSectionAndBuyBook (BookCategory category) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             super.getSectionAndBuyBook(category);
@@ -19,6 +21,7 @@ public class FictionBookStoreSection extends BookStoreSection{
         this.buyBook();
     }
 
+    @Override
     public void getSectionAndStockBooks (BookCategory category, Book book, String name) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             super.getSectionAndStockBooks(category, book, name);
@@ -28,6 +31,7 @@ public class FictionBookStoreSection extends BookStoreSection{
         this.stockBook(book, name);
     }
 
+    @Override
     public Integer getSectionQueue (BookCategory category) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             return super.getSectionQueue(category);
@@ -36,6 +40,7 @@ public class FictionBookStoreSection extends BookStoreSection{
         return this.getQueue();
     }
 
+    @Override
     public Integer getSectionBooks (BookCategory category) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             return super.getSectionBooks(category);
@@ -44,6 +49,7 @@ public class FictionBookStoreSection extends BookStoreSection{
         return this.getStock();
     }
 
+    @Override
     public Integer getSoldSectionBooks (BookCategory category) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             return super.getSoldSectionBooks(category);
