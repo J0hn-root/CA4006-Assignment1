@@ -1,83 +1,60 @@
-/*
-    A bookstore is open 24 hours a day, 365 days a year.
-    The bookstore has multiple sections such as fiction, horror, romance, fantasy, poetry, and history.
-
-    Time in the bookstore is measured in ticks.
-    There are 1000 ticks in a day.
-    Every 100 ticks (on average) a delivery is made of 10 books,
-    with a random number of books for each of the above categories.
-
-*/
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
     private Timer timer;
     private Box box;
     private BookStore bookStore;
-    private static final int TICK_DURATION = 400; // in milliseconds
-    private static final int BOOK_DELIVERY_INTERVAL = 100; //in ticks
+    private List<Assistant> assistantList;
+    private static int TICK_DURATION = 800; // in milliseconds
+    private static int BOOK_DELIVERY_INTERVAL = 100; //in ticks
     private static final int BOOKS_CARRYING_TIME = 10; //in ticks
     private static final int SECTION_CARRYING_TIME_PER_BOOK = 1; //in ticks
-    private static final int CLIENT_INTERVAL = 10; //in ticks
+    private static int CLIENT_INTERVAL = 10; //in ticks
+    private static int NUMBER_OF_ASSISTANTS = 2;
 
-    public Main() {
-        this.timer = new Timer(this.TICK_DURATION);
+    public Main () {
         this.box = new Box();
-        this.bookStore = new BookStore(this.timer);
     }
 
-    public void start() {
-        this.timer.start();
+    public void start(String tickDuration, String bookDeliveryInterval ,
+                      String clientInterval, String numberOfAssistants) {
+        this.TICK_DURATION = !tickDuration.isEmpty() ? Integer.parseInt(tickDuration) : this.TICK_DURATION;
+        this.BOOK_DELIVERY_INTERVAL = !bookDeliveryInterval.isEmpty() ? Integer.parseInt(bookDeliveryInterval) : this.BOOK_DELIVERY_INTERVAL;
+        this.CLIENT_INTERVAL = !clientInterval.isEmpty() ? Integer.parseInt(clientInterval) : this.CLIENT_INTERVAL;
+        this.NUMBER_OF_ASSISTANTS = !numberOfAssistants.isEmpty() ? Integer.parseInt(numberOfAssistants) : this.NUMBER_OF_ASSISTANTS;
+
+        this.timer = new Timer(this.TICK_DURATION);
+        this.bookStore = new BookStore(this.timer);
 
         Runnable delivery = new Delivery(this.BOOK_DELIVERY_INTERVAL, this.timer, this.box);
         Runnable clientGenerator = new ClientGenerator(this.CLIENT_INTERVAL, this.timer, this.bookStore);
 
-        String nameAs1 = "As1";
-        Runnable assistant = new Assistant(this.BOOKS_CARRYING_TIME, this.SECTION_CARRYING_TIME_PER_BOOK, this.timer, this.box, this.bookStore, nameAs1);
-        Runnable assistant2 = new Assistant(this.BOOKS_CARRYING_TIME, this.SECTION_CARRYING_TIME_PER_BOOK, this.timer, this.box, this.bookStore, "As2");
+        // create ExecutorService to manage assistants
+        ExecutorService assistantExecutor = Executors.newFixedThreadPool( this.NUMBER_OF_ASSISTANTS );
 
-        new Thread(assistant).start();
-        new Thread(assistant2).start();
+        this.assistantList = new ArrayList<>();
+        for (int i = 0; i < this.NUMBER_OF_ASSISTANTS; i++){
+            assistantList.add(new Assistant(this.BOOKS_CARRYING_TIME, this.SECTION_CARRYING_TIME_PER_BOOK, this.timer, this.box, this.bookStore, ("Assistant" + (i + 1))));
+        }
+        Runnable gui = new GUI(this.bookStore, this.timer, this.assistantList, this.TICK_DURATION);
+
+        this.timer.start();
+        new Thread(gui).start();
         new Thread(delivery).start();
         new Thread(clientGenerator).start();
 
-
-    }
-
-    class myProcess implements Runnable {
-        private String processName;
-        private Timer timer;
-
-        public myProcess(Timer timer, String processName) {
-            this.timer = timer;
-            this.processName = processName;
-        }
-
-        public void run() {
-            try {
-                if (this.processName.equals("p")) {
-                    this.timer.waitTicks(10);
-                } else if (this.processName.equals("d")) {
-                    this.timer.waitTicks(6);
-                } else if (this.processName.equals("v")) {
-                    this.timer.waitTicks(6);
-                } else if (this.processName.equals("u")) {
-                    this.timer.waitTicks(6);
-                } else {
-                    this.timer.waitTicks(2);
-                }
-            } catch (InterruptedException e){
-                 e.printStackTrace();
-            }
-            System.out.println("Hello from " + processName + " thread. Ticks: " + this.timer.getTicks());
+        for(Assistant assitant : this.assistantList){
+            assistantExecutor.execute(assitant);
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         Main main = new Main();
-        main.start();
+        MenuGUI menu = new MenuGUI(main);
     }
-
 }
-
-

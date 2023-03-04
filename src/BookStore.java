@@ -34,4 +34,12 @@ public class BookStore {
         return this.firstSectonInChain.getSectionQueue(category);
     }
 
+    public Integer getSectionBooks(BookCategory category) {
+        return this.firstSectonInChain.getSectionBooks(category);
+    }
+
+    public Integer getSoldSectionBooks(BookCategory category) {
+        return this.firstSectonInChain.getSoldSectionBooks(category);
+    }
+
 }

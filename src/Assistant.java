@@ -20,6 +20,7 @@ public class Assistant implements Runnable {
     private static int bookCarryingTime;
     private static int sectionCarryingTimePerBook;
     private String name;
+    private AssistantStatus status;
 
     public Assistant (int bookCarryingTime, int sectionCarryingTimePerBook, Timer timer, Box box, BookStore bookStore, String name) {
         this.timer = timer;
@@ -28,16 +29,32 @@ public class Assistant implements Runnable {
         this.bookStore = bookStore;
         this.sectionCarryingTimePerBook = sectionCarryingTimePerBook;
         this.name = name;
+        this.status = AssistantStatus.WAITING;
+    }
+
+    public synchronized AssistantStatus getStatus() {
+        return this.status;
+    }
+
+    public synchronized void setStatus (AssistantStatus status) {
+        this.status = status;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public void run () {
         try {
             while (true) {
+                this.setStatus(AssistantStatus.WAITING);
                 this.carriedBooks = box.retrieveBooks(this.name);
+                this.setStatus(AssistantStatus.IN_TRANSIT);
 
                 // walk from where the deliveries arrive to a particular section
                 timer.waitTicks(this.bookCarryingTime);
 
+                this.setStatus(AssistantStatus.STOCKING);
                 List<BookCategory> categories = new ArrayList<>(carriedBooks.keySet());
 
                 // sort categories based on the queue size
@@ -51,30 +68,15 @@ public class Assistant implements Runnable {
                     }
                 });
 
-                synchronized (this) {
-                    System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                    for (BookCategory value : categories) {
-                        System.out.println(value);
-                    }
-                    System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++");
-                }
-
                 Integer nBooks = 10;
                 while (categories.size() > 0) {
                     List<Book> categoryBooks = carriedBooks.get(categories.get(0));
 
-                    synchronized (this) {
-                        System.out.println("--------------------------------------------------------");
-                        System.out.println(timer.getTicks() + " : " + this.name + " : " + categoryBooks.size() + " : " + categories.get(0));
-                        for (Book value : categoryBooks) {
-                            System.out.println(value.getCategory());
-                        }
-                        System.out.println("--------------------------------------------------------");
-                    }
-
                     while(categoryBooks.size() != 0) {
                         //System.out.println(i + ": " + carriedBooks.get(i).getCategory());
                         this.bookStore.stockBooks(categories.get(0), categoryBooks.get(0), this.name);
+                        // for every book they put on the shelf, it takes 1 tick
+                        timer.waitTicks(1);
                         categoryBooks.remove(0);
                         nBooks = nBooks - 1;
                     }
@@ -91,6 +93,7 @@ public class Assistant implements Runnable {
                 }
 
                 System.out.println(this.name + ": is returning.");
+                this.setStatus(AssistantStatus.IN_TRANSIT);
                 timer.waitTicks(this.bookCarryingTime);
 
             }

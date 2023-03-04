@@ -35,4 +35,20 @@ public class FantasyBookStoreSection extends BookStoreSection{
 
         return this.getQueue();
     }
+
+    public Integer getSectionBooks (BookCategory category) {
+        if(!this.getBookStoreSectionCategory().equals(category)){
+            return super.getSectionBooks(category);
+        }
+
+        return this.getStock();
+    }
+
+    public Integer getSoldSectionBooks (BookCategory category) {
+        if(!this.getBookStoreSectionCategory().equals(category)){
+            return super.getSoldSectionBooks(category);
+        }
+
+        return this.getSoldBooks();
+    }
 }

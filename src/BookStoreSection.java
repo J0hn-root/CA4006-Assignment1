@@ -5,12 +5,14 @@ public class BookStoreSection {
     private Timer timer;
     private List<Book> shelf;
     private Integer queue;
+    private Integer soldBooks;
     private BookStoreSection nextSection = null;
 
     public BookStoreSection (Timer timer) {
         this.timer = timer;
         this.shelf = new ArrayList<>();
         this.queue = 0;
+        this.soldBooks = 0;
     }
 
     public BookCategory getBookStoreSectionCategory () {
@@ -42,6 +44,22 @@ public class BookStoreSection {
         return null;
     }
 
+    public Integer getSectionBooks (BookCategory category) {
+        if(this.nextSection != null){
+            return this.nextSection.getSectionBooks(category);
+        }
+
+        return null;
+    }
+
+    public Integer getSoldSectionBooks (BookCategory category) {
+        if(this.nextSection != null){
+            return this.nextSection.getSoldSectionBooks(category);
+        }
+
+        return null;
+    }
+
     public synchronized Integer getStock() {
         return this.shelf.size();
     }
@@ -58,27 +76,16 @@ public class BookStoreSection {
         return this.queue;
     }
 
-    private synchronized void stockBook(Book book) {
-        this.shelf.add(book);
-    }
-
-    private synchronized void sellBook() {
-        this.shelf.remove(0);
+    public synchronized Integer getSoldBooks() {
+        return this.soldBooks;
     }
 
     public synchronized void stockBook (Book bookDelivered, String name){
-        try {
+        System.out.println(this.getBookStoreSectionCategory() + ": Currently Stocking Book.");
+        this.shelf.add(bookDelivered);
+        notify();
 
-            System.out.println(this.getBookStoreSectionCategory() + ": Currently Stocking Book.");
-            this.stockBook(bookDelivered);
-            notify();
-            // for every book they put on the shelf, it takes 1 tick
-            timer.waitTicks(1);
-
-            System.out.println(name + ": " + this.getBookStoreSectionCategory() + " books stocked! " + this.getStock());
-        } catch (InterruptedException e){
-            e.printStackTrace();
-        }
+        System.out.println(name + ": " + this.getBookStoreSectionCategory() + " books stocked! " + this.shelf.size());
     }
 
     public synchronized void buyBook ( ){
@@ -88,10 +95,15 @@ public class BookStoreSection {
                 this.increaseQueue();
                 System.out.println(this.getBookStoreSectionCategory() + ": Queue " + this.getQueue());
                 wait();
+                System.out.println(this.getBookStoreSectionCategory() + ": wait out!");
+                this.decreaseQueue();
             }
 
-            this.sellBook();
-            this.decreaseQueue();
+            //possible error here wait/new client enters
+            System.out.println(this.getBookStoreSectionCategory() + ": Client out!");
+            this.soldBooks++;
+            System.out.println(shelf.size());
+            this.shelf.remove(0);
 
             System.out.println(this.getBookStoreSectionCategory() + ": Books sold! " + this.getStock());
         } catch (InterruptedException e) {
