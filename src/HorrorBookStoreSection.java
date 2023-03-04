@@ -13,6 +13,7 @@ public class HorrorBookStoreSection extends BookStoreSection {
     public void getSectionAndBuyBook (BookCategory category) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             super.getSectionAndBuyBook(category);
+            return;
         }
 
         this.buyBook();
@@ -21,6 +22,7 @@ public class HorrorBookStoreSection extends BookStoreSection {
     public void getSectionAndStockBooks (BookCategory category, Book book, String name) {
         if(!this.getBookStoreSectionCategory().equals(category)){
             super.getSectionAndStockBooks(category, book, name);
+            return;
         }
 
         this.stockBook(book, name);
@@ -28,7 +30,7 @@ public class HorrorBookStoreSection extends BookStoreSection {
 
     public Integer getSectionQueue (BookCategory category) {
         if(!this.getBookStoreSectionCategory().equals(category)){
-            super.getSectionQueue(category);
+            return super.getSectionQueue(category);
         }
 
         return this.getQueue();

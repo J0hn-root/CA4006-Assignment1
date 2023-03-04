@@ -19,12 +19,22 @@ public class Delivery implements Runnable {
             while (true) {
                 timer.waitTicks(this.bookDeliveryInterval);
 
-                List<Book> deliveredBooks = new ArrayList<>();
+                HashMap<BookCategory, List<Book>> deliveredBooks = new HashMap<>();
                 for(int i = 0; i < 10; i++){
                     Book newBook = new Book();
 
-                    deliveredBooks.add(newBook);
+                    if (!deliveredBooks.containsKey(newBook.getCategory())){
+                        deliveredBooks.put(newBook.getCategory(), new ArrayList<>());
+                    }
+                    List<Book> bookList = deliveredBooks.get(newBook.getCategory());
+                    bookList.add(newBook);
                 }
+
+//                for (Map.Entry<BookCategory, List<Book>> entry : deliveredBooks.entrySet()) {
+//                    BookCategory key = entry.getKey();
+//                    List<Book> value = entry.getValue();
+//                    System.out.println(key + " -> " + value);
+//                }
 
                 box.deliverBooks(deliveredBooks);
                 //Testing only

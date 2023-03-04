@@ -15,7 +15,7 @@ public class Main {
     private Box box;
     private BookStore bookStore;
     private static final int TICK_DURATION = 400; // in milliseconds
-    private static final int BOOK_DELIVERY_INTERVAL = 20; //in ticks
+    private static final int BOOK_DELIVERY_INTERVAL = 100; //in ticks
     private static final int BOOKS_CARRYING_TIME = 10; //in ticks
     private static final int SECTION_CARRYING_TIME_PER_BOOK = 1; //in ticks
     private static final int CLIENT_INTERVAL = 10; //in ticks

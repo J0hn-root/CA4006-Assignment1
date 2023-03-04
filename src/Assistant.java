@@ -13,7 +13,7 @@ import java.util.*;
 
 public class Assistant implements Runnable {
 
-    private List<Book> carriedBooks;
+    private Map<BookCategory, List<Book>> carriedBooks;
     private Timer timer;
     private Box box;
     private BookStore bookStore;
@@ -38,57 +38,54 @@ public class Assistant implements Runnable {
                 // walk from where the deliveries arrive to a particular section
                 timer.waitTicks(this.bookCarryingTime);
 
-                ArrayList<BookCategory> categories = new ArrayList<>();
-                categories.addAll(EnumSet.allOf(BookCategory.class));
+                List<BookCategory> categories = new ArrayList<>(carriedBooks.keySet());
 
                 // sort categories based on the queue size
+                // section with bigger queues will be stocked first
                 Collections.sort(categories, new Comparator<BookCategory>() {
                     @Override
                     public int compare(BookCategory category1, BookCategory category2) {
                         int queue1 = bookStore.getSectionQueue(category1);
                         int queue2 = bookStore.getSectionQueue(category2);
-                        return Integer.compare(queue1, queue2);
+                        return Integer.compare(queue2, queue1);
                     }
                 });
 
-
-                // Sort the list of carried books by category
-                Collections.sort(carriedBooks, new Comparator<Book>() {
-                    @Override
-                    public int compare(Book book1, Book book2) {
-                        BookCategory categoryBookOne =  book1.getCategory();
-                        BookCategory categoryBookTwo =  book2.getCategory();
-                        return categoryBookOne.compareTo(categoryBookTwo);
+                synchronized (this) {
+                    System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                    for (BookCategory value : categories) {
+                        System.out.println(value);
                     }
-                });
+                    System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++");
+                }
 
-                Integer nBooks;
+                Integer nBooks = 10;
                 while (categories.size() > 0) {
+                    List<Book> categoryBooks = carriedBooks.get(categories.get(0));
+
                     synchronized (this) {
                         System.out.println("--------------------------------------------------------");
-                        System.out.println(this.name + " : " + carriedBooks.size() + " : " + categories.get(0));
-                        for (Book value : carriedBooks) {
+                        System.out.println(timer.getTicks() + " : " + this.name + " : " + categoryBooks.size() + " : " + categories.get(0));
+                        for (Book value : categoryBooks) {
                             System.out.println(value.getCategory());
                         }
                         System.out.println("--------------------------------------------------------");
                     }
 
-                    while(carriedBooks.get(0).getCategory().equals(categories.get(0))) {
+                    while(categoryBooks.size() != 0) {
                         //System.out.println(i + ": " + carriedBooks.get(i).getCategory());
-                        this.bookStore.stockBooks(categories.get(0), carriedBooks.get(0), this.name);
-                        carriedBooks.remove(0);
-
+                        this.bookStore.stockBooks(categories.get(0), categoryBooks.get(0), this.name);
+                        categoryBooks.remove(0);
+                        nBooks = nBooks - 1;
                     }
 
                     categories.remove(0);
 
-                    //1 tick extra for every book they are carrying to that section.
-                    nBooks = carriedBooks.size();
-                    System.out.println(this.name + ": Waiting for " + nBooks + " Ticks.");
-
-                    if (carriedBooks.size() == 0) {
+                    if (nBooks == 0) {
                         carriedBooks = null;
                     } else {
+                        //1 tick extra for every book they are carrying to that section.
+                        System.out.println(this.name + ": Waiting for " + nBooks + " Ticks.");
                         timer.waitTicks(nBooks);
                     }
                 }
