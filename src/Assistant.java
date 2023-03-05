@@ -54,7 +54,6 @@ public class Assistant implements Runnable {
                 // walk from where the deliveries arrive to a particular section
                 timer.waitTicks(this.bookCarryingTime);
 
-                this.setStatus(AssistantStatus.STOCKING);
                 List<BookCategory> categories = new ArrayList<>(carriedBooks.keySet());
 
                 // sort categories based on the queue size
@@ -70,6 +69,7 @@ public class Assistant implements Runnable {
 
                 Integer nBooks = 10;
                 while (categories.size() > 0) {
+                    this.setStatus(AssistantStatus.STOCKING);
                     List<Book> categoryBooks = carriedBooks.get(categories.get(0));
 
                     while(categoryBooks.size() != 0) {
@@ -87,12 +87,12 @@ public class Assistant implements Runnable {
                         carriedBooks = null;
                     } else {
                         //1 tick extra for every book they are carrying to that section.
-                        System.out.println(this.name + ": Waiting for " + nBooks + " Ticks.");
-                        timer.waitTicks(nBooks);
+                        System.out.println(this.name + ": Waiting for " + (this.bookCarryingTime + nBooks) + " Ticks.");
+                        this.setStatus(AssistantStatus.SWITCHING_SECTION);
+                        timer.waitTicks(this.bookCarryingTime + nBooks); // wait 10 ticks + number of books left
                     }
                 }
 
-                System.out.println(this.name + ": is returning.");
                 this.setStatus(AssistantStatus.RETURNING);
                 timer.waitTicks(this.bookCarryingTime);
 

@@ -1,12 +1,9 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Delivery implements Runnable {
     private Timer timer;
     private Box box;
-    private static int bookDeliveryInterval;
+    private static Integer bookDeliveryInterval;
 
     public Delivery(Integer bookDeliveryInterval, Timer timer, Box box) {
         this.bookDeliveryInterval = bookDeliveryInterval;
@@ -17,7 +14,9 @@ public class Delivery implements Runnable {
     public void run() {
         try {
             while (true) {
-                timer.waitTicks(this.bookDeliveryInterval);
+                Random randgen = new Random();
+                Integer intervalDelivery = 2 * randgen.nextInt(this.bookDeliveryInterval);
+                timer.waitTicks(intervalDelivery);
 
                 HashMap<BookCategory, List<Book>> deliveredBooks = new HashMap<>();
                 for(int i = 0; i < 10; i++){

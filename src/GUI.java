@@ -136,7 +136,7 @@ public class GUI implements Runnable {
         this.assistantStatusLabel = new HashMap<>();
 
         JPanel assistantPanel = new JPanel();
-        assistantPanel.setBounds(750,110,250,330);
+        assistantPanel.setBounds(650,110,350,330);
         assistantPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         assistantPanel.setLayout(null);
 
@@ -148,7 +148,7 @@ public class GUI implements Runnable {
             AssistantStatus status = assistant.getStatus();
 
             JLabel assistantStatusLabel = new JLabel(assistant.getName() + ": " + status);
-            assistantStatusLabel.setBounds(10,assistantStatusPanelY,150,30);
+            assistantStatusLabel.setBounds(10,assistantStatusPanelY,250,30);
             assistantPanel.add(assistantStatusLabel);
             this.assistantStatusLabel.put(assistant, assistantStatusLabel);
 
