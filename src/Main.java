@@ -39,7 +39,7 @@ public class Main {
 
         this.assistantList = new ArrayList<>();
         for (int i = 0; i < this.NUMBER_OF_ASSISTANTS; i++){
-            assistantList.add(new Assistant(this.BOOKS_CARRYING_TIME, this.SECTION_CARRYING_TIME_PER_BOOK, this.timer, this.box, this.bookStore, ("Assistant" + (i + 1))));
+            assistantList.add(new Assistant(this.BOOKS_CARRYING_TIME, this.SECTION_CARRYING_TIME_PER_BOOK, this.timer, this.box, this.bookStore, ("Assistant-" + (i + 1))));
         }
         Runnable gui = new GUI(this.bookStore, this.timer, this.assistantList, this.TICK_DURATION);
 

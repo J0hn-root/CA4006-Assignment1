@@ -93,17 +93,11 @@ public class BookStoreSection {
         try {
             if(shelf.size() == 0){
                 this.increaseQueue();
-                System.out.println(this.getBookStoreSectionCategory() + ": Queue " + this.getQueue());
                 wait();
-                System.out.println(this.getBookStoreSectionCategory() + ": wait out!");
                 this.decreaseQueue();
             }
-
-            //possible error here wait/new client enters
-            System.out.println(this.getBookStoreSectionCategory() + ": Client out!");
-            this.soldBooks++;
-            System.out.println(shelf.size());
             this.shelf.remove(0);
+            this.soldBooks++;
 
             System.out.println(this.getBookStoreSectionCategory() + ": Books sold! " + this.getStock());
         } catch (InterruptedException e) {

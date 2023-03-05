@@ -38,7 +38,8 @@ public class GUI implements Runnable {
     private Integer tickDuration;
     private JButton resumetButton;
     private JButton stopButton;
-    private Map<AssistantStatus, JPanel> assistantStatusPanels;
+    private JPanel assistantStatusPanels;
+    private Map<Assistant, JLabel> assistantStatusLabel;
 
     public GUI(BookStore bookStore, Timer timer, List<Assistant> assistantList, Integer ticksDuration) {
         this.bookStore = bookStore;
@@ -132,30 +133,27 @@ public class GUI implements Runnable {
 
         // ASSISTANT
 
-//        this.assistantStatusPanels = new HashMap<>();
-//        Integer assistantStatusPanelX = 250;
-//
-//        for(AssistantStatus assistantStatus : this.assistantStatuses) {
-//            JPanel panel = new JPanel();
-//            panel.setBounds(assistantStatusPanelX,110,250,330);
-//            panel.setBorder(BorderFactory.createLineBorder(Color.black));
-//            panel.setLayout(new FlowLayout());
-//            assistantStatusPanelX = assistantStatusPanelX + 250;
-//
-//            JLabel titleLabel = new JLabel(assistantStatus + ":");
-//            panel.add(titleLabel);
-//
-//            frame.add(panel);
-//            this.assistantStatusPanels.put(assistantStatus, panel);
-//        }
-//
-//        for (Assistant assistant : assistantList) {
-//            AssistantStatus status = assistant.getStatus();
-//            JPanel assistantStatusPanel = assistantStatusPanels.get(status);
-//
-//            JLabel assistantStatusLabel = new JLabel(assistant.getName());
-//            assistantStatusPanel.add(assistantStatusLabel);
-//        }
+        this.assistantStatusLabel = new HashMap<>();
+
+        JPanel assistantPanel = new JPanel();
+        assistantPanel.setBounds(750,110,250,330);
+        assistantPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        assistantPanel.setLayout(null);
+
+        frame.add(assistantPanel);
+        this.assistantStatusPanels = assistantPanel;
+
+        Integer assistantStatusPanelY = 0;
+        for (Assistant assistant : assistantList) {
+            AssistantStatus status = assistant.getStatus();
+
+            JLabel assistantStatusLabel = new JLabel(assistant.getName() + ": " + status);
+            assistantStatusLabel.setBounds(10,assistantStatusPanelY,150,30);
+            assistantPanel.add(assistantStatusLabel);
+            this.assistantStatusLabel.put(assistant, assistantStatusLabel);
+
+            assistantStatusPanelY = assistantStatusPanelY + 30;
+        }
 
     }
 
@@ -168,24 +166,12 @@ public class GUI implements Runnable {
                 sectionLabel.get("BooksSold").setText("Books sold: " + this.bookStore.getSoldSectionBooks(category));
             }
 
-//            for (AssistantStatus status : this.assistantStatuses) {
-//                JPanel previousPanel = this.assistantStatusPanels.get(status);
-//                previousPanel.removeAll();
-//                JLabel titleLabel = new JLabel(status + ":");
-//                previousPanel.add(titleLabel);
-//
-//                for (Assistant assistant : assistantList) {
-//                    //add new assistant status
-//                    AssistantStatus assistantStatus = assistant.getStatus();
-//
-//                    if (assistantStatus.equals(status)) {
-//                        JLabel assistantStatusLabel = new JLabel(assistant.getName());
-//                        previousPanel.add(assistantStatusLabel);
-//                    }
-//                }
-//
-//                previousPanel.revalidate();
-//            }
+            for (Assistant assistant : assistantList) {
+                AssistantStatus status = assistant.getStatus();
+
+                JLabel assistantStatusLabel = this.assistantStatusLabel.get(assistant);
+                assistantStatusLabel.setText(assistant.getName() + ": " + status);
+            }
 
             this.ticksLabel.setText("Clock(in ticks): " + this.timer.getTicks());
         }, this.tickDuration, this.tickDuration, TimeUnit.MILLISECONDS); //delay, time, time unit

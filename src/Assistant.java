@@ -93,7 +93,7 @@ public class Assistant implements Runnable {
                 }
 
                 System.out.println(this.name + ": is returning.");
-                this.setStatus(AssistantStatus.IN_TRANSIT);
+                this.setStatus(AssistantStatus.RETURNING);
                 timer.waitTicks(this.bookCarryingTime);
 
             }
