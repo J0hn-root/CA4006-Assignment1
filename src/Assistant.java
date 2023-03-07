@@ -29,7 +29,7 @@ public class Assistant implements Runnable {
         this.bookStore = bookStore;
         this.sectionCarryingTimePerBook = sectionCarryingTimePerBook;
         this.name = name;
-        this.status = AssistantStatus.WAITING;
+        this.status = AssistantStatus.WAITING_DELIVERY;
     }
 
     public synchronized AssistantStatus getStatus() {
@@ -47,34 +47,35 @@ public class Assistant implements Runnable {
     public void run () {
         try {
             while (true) {
-                this.setStatus(AssistantStatus.WAITING);
+                this.setStatus(AssistantStatus.WAITING_DELIVERY);
                 this.carriedBooks = box.retrieveBooks(this.name);
+                Integer nBooks = 10;
+
                 this.setStatus(AssistantStatus.IN_TRANSIT);
 
                 // walk from where the deliveries arrive to a particular section
-                timer.waitTicks(this.bookCarryingTime);
+                timer.waitTicks(this.bookCarryingTime + nBooks);
 
                 List<BookCategory> categories = new ArrayList<>(carriedBooks.keySet());
 
-                // sort categories based on the queue size
-                // section with bigger queues will be stocked first
-                Collections.sort(categories, new Comparator<BookCategory>() {
-                    @Override
-                    public int compare(BookCategory category1, BookCategory category2) {
-                        int queue1 = bookStore.getSectionQueue(category1);
-                        int queue2 = bookStore.getSectionQueue(category2);
-                        return Integer.compare(queue2, queue1);
-                    }
-                });
-
-                Integer nBooks = 10;
                 while (categories.size() > 0) {
+                    // sort categories based on the queue size
+                    // section with bigger queues will be stocked first
+                    Collections.sort(categories, new Comparator<BookCategory>() {
+                        @Override
+                        public int compare(BookCategory category1, BookCategory category2) {
+                            int queue1 = bookStore.getSectionQueue(category1);
+                            int queue2 = bookStore.getSectionQueue(category2);
+                            return Integer.compare(queue2, queue1);
+                        }
+                    });
+
                     this.setStatus(AssistantStatus.STOCKING);
                     List<Book> categoryBooks = carriedBooks.get(categories.get(0));
 
                     while(categoryBooks.size() != 0) {
                         //System.out.println(i + ": " + carriedBooks.get(i).getCategory());
-                        this.bookStore.stockBooks(categories.get(0), categoryBooks.get(0), this.name);
+                        this.bookStore.stockBooks(categories.get(0), categoryBooks.get(0), this);
                         // for every book they put on the shelf, it takes 1 tick
                         timer.waitTicks(1);
                         categoryBooks.remove(0);

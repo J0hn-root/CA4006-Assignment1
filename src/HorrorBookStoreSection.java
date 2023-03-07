@@ -2,8 +2,8 @@ import java.util.List;
 
 public class HorrorBookStoreSection extends BookStoreSection {
 
-    public HorrorBookStoreSection (Timer timer) {
-        super(timer);
+    public HorrorBookStoreSection (Timer timer, Integer shelfCapacity) {
+        super(timer, shelfCapacity);
     }
 
     @Override
@@ -22,13 +22,13 @@ public class HorrorBookStoreSection extends BookStoreSection {
     }
 
     @Override
-    public void getSectionAndStockBooks (BookCategory category, Book book, String name) {
+    public void getSectionAndStockBooks (BookCategory category, Book book, Assistant assistant) {
         if(!this.getBookStoreSectionCategory().equals(category)){
-            super.getSectionAndStockBooks(category, book, name);
+            super.getSectionAndStockBooks(category, book, assistant);
             return;
         }
 
-        this.stockBook(book, name);
+        this.stockBook(book, assistant);
     }
 
     @Override

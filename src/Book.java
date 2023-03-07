@@ -3,6 +3,10 @@ import java.util.Random;
 public class Book {
     private BookCategory category;
 
+    public Book(BookCategory category) {
+        this.category = category;
+    }
+
     public Book() {
         BookCategory[] categories = BookCategory.values();
         Random random = new Random();

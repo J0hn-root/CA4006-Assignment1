@@ -8,15 +8,15 @@ public class BookStore {
     private BookStoreSection firstSectonInChain;
 
 
-    public BookStore (Timer timer) {
-        BookStoreSection firstSectioninChain = new FictionBookStoreSection(timer);
+    public BookStore (Timer timer, Integer shelfCapacity) {
+        BookStoreSection firstSectioninChain = new FictionBookStoreSection(timer, shelfCapacity);
 
         firstSectioninChain
-                .setNextBookStoreSectionInChain(new HorrorBookStoreSection(timer))
-                .setNextBookStoreSectionInChain(new RomanceBookStoreSection(timer))
-                .setNextBookStoreSectionInChain(new FantasyBookStoreSection(timer))
-                .setNextBookStoreSectionInChain(new PoetryBookStoreSection(timer))
-                .setNextBookStoreSectionInChain(new HistoryBookStoreSection(timer));
+                .setNextBookStoreSectionInChain(new HorrorBookStoreSection(timer, shelfCapacity))
+                .setNextBookStoreSectionInChain(new RomanceBookStoreSection(timer, shelfCapacity))
+                .setNextBookStoreSectionInChain(new FantasyBookStoreSection(timer, shelfCapacity))
+                .setNextBookStoreSectionInChain(new PoetryBookStoreSection(timer, shelfCapacity))
+                .setNextBookStoreSectionInChain(new HistoryBookStoreSection(timer, shelfCapacity));
 
         this.firstSectonInChain = firstSectioninChain;
         this.timer = timer;
@@ -26,8 +26,8 @@ public class BookStore {
         this.firstSectonInChain.getSectionAndBuyBook(category);
     }
 
-    public void stockBooks(BookCategory category, Book book, String name) {
-        this.firstSectonInChain.getSectionAndStockBooks(category, book, name);
+    public void stockBooks(BookCategory category, Book book, Assistant assistant) {
+        this.firstSectonInChain.getSectionAndStockBooks(category, book, assistant);
     }
 
     public Integer getSectionQueue(BookCategory category) {

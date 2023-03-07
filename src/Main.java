@@ -16,20 +16,22 @@ public class Main {
     private static final int SECTION_CARRYING_TIME_PER_BOOK = 1; //in ticks
     private static int CLIENT_INTERVAL = 10; //in ticks
     private static int NUMBER_OF_ASSISTANTS = 2;
+    private static int SHELF_CAPACITY = 10;
 
     public Main () {
         this.box = new Box();
     }
 
     public void start(String tickDuration, String bookDeliveryInterval ,
-                      String clientInterval, String numberOfAssistants) {
+                      String clientInterval, String numberOfAssistants, String shelfCapacity) {
         this.TICK_DURATION = !tickDuration.isEmpty() ? Integer.parseInt(tickDuration) : this.TICK_DURATION;
         this.BOOK_DELIVERY_INTERVAL = !bookDeliveryInterval.isEmpty() ? Integer.parseInt(bookDeliveryInterval) : this.BOOK_DELIVERY_INTERVAL;
         this.CLIENT_INTERVAL = !clientInterval.isEmpty() ? Integer.parseInt(clientInterval) : this.CLIENT_INTERVAL;
         this.NUMBER_OF_ASSISTANTS = !numberOfAssistants.isEmpty() ? Integer.parseInt(numberOfAssistants) : this.NUMBER_OF_ASSISTANTS;
+        this.SHELF_CAPACITY = !shelfCapacity.isEmpty() ? Integer.parseInt(shelfCapacity) : this.SHELF_CAPACITY;
 
         this.timer = new Timer(this.TICK_DURATION);
-        this.bookStore = new BookStore(this.timer);
+        this.bookStore = new BookStore(this.timer, this.SHELF_CAPACITY);
 
         Runnable delivery = new Delivery(this.BOOK_DELIVERY_INTERVAL, this.timer, this.box);
         Runnable clientGenerator = new ClientGenerator(this.CLIENT_INTERVAL, this.timer, this.bookStore);

@@ -23,9 +23,8 @@ public class Timer {
         this.scheduler.scheduleAtFixedRate(() -> {
             if (!pause) {
                 //System.out.println("Ticks: "+ this.ticks);
-                this.ticks++;
-
                 synchronized (lock) {
+                    this.ticks++;
                     lock.notifyAll();
                 }
             }

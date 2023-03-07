@@ -14,10 +14,13 @@ public class MenuGUI {
     private JTextField clientIntervalGenerationField;
     private JLabel numberOfAssistantsLabel;
     private JTextField numberOfAssistantsField;
+    private JLabel shelfCapacityLabel;
+    private JTextField shelfCapacityField;
+
     public MenuGUI (Main main) {
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setSize(900, 500);
-        this.frame.setLayout(new GridLayout(5, 2));
+        this.frame.setLayout(new GridLayout(6, 2));
 
         tickDurationLabel = new JLabel("Tick duration (in milliseconds - 1000 -> 1s): (Default 800)");
         tickDurationField = new JTextField();
@@ -31,11 +34,14 @@ public class MenuGUI {
         numberOfAssistantsLabel = new JLabel("Number of assistants: (Default 2)");
         numberOfAssistantsField = new JTextField();
 
+        shelfCapacityLabel = new JLabel("Shelf capacity: (Default 10)");
+        shelfCapacityField = new JTextField();
+
         JButton button = new JButton("Start");
         button.addActionListener(e -> {
             frame.dispose();
             main.start(tickDurationField.getText(), bookDeliveryIntervalField.getText(),
-                    clientIntervalGenerationField.getText(), numberOfAssistantsField.getText());
+                    clientIntervalGenerationField.getText(), numberOfAssistantsField.getText(), shelfCapacityField.getText());
         });
 
 
@@ -50,6 +56,9 @@ public class MenuGUI {
 
         this.frame.add(numberOfAssistantsLabel);
         this.frame.add(numberOfAssistantsField);
+
+        this.frame.add(shelfCapacityLabel);
+        this.frame.add(shelfCapacityField);
         this.frame.add(button);
 
         this.frame.setVisible(true);

@@ -2,6 +2,7 @@ public enum AssistantStatus {
     STOCKING,
     IN_TRANSIT,
     SWITCHING_SECTION,
+    QUEUE_SECTION_FULL,
     RETURNING,
-    WAITING
+    WAITING_DELIVERY
 }

@@ -4,15 +4,20 @@ import java.util.List;
 public class BookStoreSection {
     private Timer timer;
     private List<Book> shelf;
+    private Integer shelfCapacity;
     private Integer queue;
     private Integer soldBooks;
     private BookStoreSection nextSection = null;
+    private Object assistantLock = new Object();
 
-    public BookStoreSection (Timer timer) {
+    public BookStoreSection (Timer timer, Integer shelfCapacity) {
         this.timer = timer;
         this.shelf = new ArrayList<>();
+        // each section starts with a book
+        this.shelf.add(new Book(this.getBookStoreSectionCategory()));
         this.queue = 0;
         this.soldBooks = 0;
+        this.shelfCapacity = shelfCapacity;
     }
 
     public BookCategory getBookStoreSectionCategory () {
@@ -30,9 +35,9 @@ public class BookStoreSection {
         }
     }
 
-    public void getSectionAndStockBooks (BookCategory category, Book book, String name) {
+    public void getSectionAndStockBooks (BookCategory category, Book book, Assistant assistant) {
         if(this.nextSection != null){
-            this.nextSection.getSectionAndStockBooks(category, book, name);
+            this.nextSection.getSectionAndStockBooks(category, book, assistant);
         }
     }
 
@@ -80,24 +85,53 @@ public class BookStoreSection {
         return this.soldBooks;
     }
 
-    public synchronized void stockBook (Book bookDelivered, String name){
-        System.out.println(this.getBookStoreSectionCategory() + ": Currently Stocking Book.");
-        this.shelf.add(bookDelivered);
-        notify();
+    public void stockBook (Book bookDelivered, Assistant assistant){
+        try {
+            System.out.println(this.getBookStoreSectionCategory() + ": Currently Stocking Book.");
 
-        System.out.println(name + ": " + this.getBookStoreSectionCategory() + " books stocked! " + this.shelf.size());
+            synchronized (assistantLock) {
+                while (this.shelf.size() == this.shelfCapacity ) {
+                    assistant.setStatus(AssistantStatus.QUEUE_SECTION_FULL);
+                    assistantLock.wait();
+                }
+            }
+
+            synchronized (this) {
+                assistant.setStatus(AssistantStatus.STOCKING);
+                this.shelf.add(bookDelivered);
+                notify();
+            }
+
+            System.out.println(assistant.getName() + ": " + this.getBookStoreSectionCategory() + " books stocked! ");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public synchronized void buyBook ( ){
+    public void buyBook ( ){
         System.out.println(this.getBookStoreSectionCategory() + ": Client In!");
         try {
-            if(shelf.size() == 0){
-                this.increaseQueue();
-                wait();
-                this.decreaseQueue();
+            synchronized (this) {
+                if (shelf.size() == 0) {
+                    this.increaseQueue();
+                    wait();
+                    this.decreaseQueue();
+                }
             }
-            this.shelf.remove(0);
-            this.soldBooks++;
+
+            synchronized (this) {
+                try {
+                    this.shelf.remove(0);
+                    this.soldBooks++;
+                } catch (Exception e) {
+                    System.out.println(shelf.size());
+                    throw new RuntimeException(e);
+                }
+            }
+
+            synchronized (assistantLock){
+                assistantLock.notify();
+            }
 
             System.out.println(this.getBookStoreSectionCategory() + ": Books sold! " + this.getStock());
         } catch (InterruptedException e) {
