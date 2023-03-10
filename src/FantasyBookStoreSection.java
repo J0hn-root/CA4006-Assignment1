@@ -1,5 +1,3 @@
-import java.util.List;
-
 public class FantasyBookStoreSection extends BookStoreSection{
 
     public FantasyBookStoreSection (Timer timer, Integer shelfCapacity) {
@@ -56,5 +54,24 @@ public class FantasyBookStoreSection extends BookStoreSection{
         }
 
         return this.getSoldBooks();
+    }
+
+    @Override
+    public void setSectionCustomerWaitingTime (BookCategory category, Integer waitingTime) {
+        if(!this.getBookStoreSectionCategory().equals(category)){
+            super.setSectionCustomerWaitingTime(category, waitingTime);
+            return;
+        }
+
+        this.setCustomerWaitingTime(waitingTime);
+    }
+
+    @Override
+    public double getSectionCustomerWaitingTime (BookCategory category) {
+        if(!this.getBookStoreSectionCategory().equals(category)){
+            return super.getSectionCustomerWaitingTime(category);
+        }
+
+        return this.getCustomerWaitingTime();
     }
 }

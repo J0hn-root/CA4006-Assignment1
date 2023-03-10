@@ -1,5 +1,3 @@
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -11,12 +9,15 @@ public class Timer {
     private volatile int ticks;
     private Object lock = new Object();
     private Boolean pause;
+    private Integer numberOfJobs;
 
     public Timer(Integer tickDuration) {
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.ticks = 0;
         this.tickDuration = tickDuration;
         this.pause = false;
+        // initialize number of jobs executed to 1 (timer thread)
+        this.numberOfJobs = 1;
     }
 
     public void start() {
@@ -31,16 +32,27 @@ public class Timer {
         }, this.tickDuration, this.tickDuration, TimeUnit.MILLISECONDS); //delay, time, time unit
     }
 
+    public String getThreadName() {
+        return  Thread.currentThread().getName();
+    }
+    public synchronized void increaseNumberOfJobs () {
+        this.numberOfJobs++;
+    }
+
+    public synchronized void decreaseNumberOfJobs () {
+        this.numberOfJobs--;
+    }
+
+    public synchronized Integer getNumberOfJobs () {
+        return this.numberOfJobs;
+    }
+
     public void stop() {
         this.scheduler.shutdown();
     }
 
-    public void pauseTimer() {
-        this.pause = true;
-    }
-
-    public void resumeTimer() {
-        this.pause = false;
+    public void pauseResumeTimer() {
+        this.pause = !this.pause;
     }
 
     public int getTicks() {

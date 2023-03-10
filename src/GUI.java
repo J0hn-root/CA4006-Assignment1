@@ -11,11 +11,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +22,7 @@ public class GUI implements Runnable {
 
     private BookStore bookStore;
     private Timer timer;
+    private Box box;
     private List<Assistant> assistantList;
     private BookCategory[] categories;
     private AssistantStatus[] assistantStatuses;
@@ -34,18 +30,24 @@ public class GUI implements Runnable {
     private Map<BookCategory, JPanel> panels;
     private Map<BookCategory, Map<String, JLabel>> labels;
     private JLabel ticksLabel;
+    private JLabel jobsLabel;
+    private JLabel deliveryBoxLabel;
+    private JLabel customerWaitingMeanLabel;
     private ScheduledExecutorService scheduler;
     private Integer tickDuration;
     private JButton resumetButton;
-    private JButton stopButton;
-    private JPanel assistantStatusPanels;
-    private Map<Assistant, JLabel> assistantStatusLabel;
+    private JButton stopResumeButton;
+    private Map<Assistant, JPanel> assistantStatusPanels;
+    private Map<Assistant, Map<String, JLabel>> assistantStatusLabel;
+    private Map<BookCategory, JLabel> deliveryBoxLabels;
+    private Map<Assistant, Map<BookCategory, JLabel>> assistantBooksRetrievedLabel;
 
-    public GUI(BookStore bookStore, Timer timer, List<Assistant> assistantList, Integer ticksDuration) {
+    public GUI(BookStore bookStore, Timer timer, Box box, List<Assistant> assistantList, Integer ticksDuration) {
         this.bookStore = bookStore;
         this.categories = BookCategory.values();
         this.assistantStatuses = AssistantStatus.values();
         this.timer = timer;
+        this.box = box;
         this.assistantList = assistantList;
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.tickDuration = ticksDuration;
@@ -66,10 +68,10 @@ public class GUI implements Runnable {
             Map<String, JLabel> sectionLabels = new HashMap<>();
 
             JPanel sectionPanel = new JPanel();
-            sectionPanel.setBounds(0,panelY,250,110);
+            sectionPanel.setBounds(0,panelY,250,130);
             sectionPanel.setBorder(BorderFactory.createLineBorder(Color.black));
             sectionPanel.setLayout(null);
-            panelY = panelY + 110;
+            panelY = panelY + 130;
 
             JLabel titleLabel = new JLabel("BookStore Section: " + category);
             titleLabel.setBounds(10, 0, 200, 40);
@@ -91,6 +93,13 @@ public class GUI implements Runnable {
             sectionPanel.add(booksSoldLabel);
             sectionLabels.put("BooksSold", booksSoldLabel);
 
+            double sectionMean = this.bookStore.getSectionCustomerWaitingTime(category);
+            String sectionMeanString = String.format("%.2f", sectionMean);
+            JLabel sectionQueueWaitingTimeLabel = new JLabel("Queue waiting time: " + sectionMeanString);
+            sectionQueueWaitingTimeLabel.setBounds(10, 100, 200, 20);
+            sectionPanel.add(sectionQueueWaitingTimeLabel);
+            sectionLabels.put("QueueStatistics", sectionQueueWaitingTimeLabel);
+
             this.frame.add(sectionPanel);
             this.labels.put(category, sectionLabels);
             this.panels.put(category, sectionPanel);
@@ -98,61 +107,111 @@ public class GUI implements Runnable {
 
         // CLOCK (in ticks)
         JPanel tickPanel = new JPanel();
-        tickPanel.setBounds(750,0,250,100);
+        tickPanel.setBounds(650,0,350,120);
         tickPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         tickPanel.setLayout(null);
 
         this.ticksLabel = new JLabel("Clock(in ticks): 0");
-        this.ticksLabel.setBounds(10, 0, 150, 40);
+        this.ticksLabel.setBounds(10, 0, 150, 30);
         tickPanel.add(this.ticksLabel);
+
+        this.jobsLabel = new JLabel("Jobs running: " + this.timer.getNumberOfJobs());
+        this.jobsLabel.setBounds(10, 30, 150, 30);
+        tickPanel.add(this.jobsLabel);
+
+        this.deliveryBoxLabel = new JLabel("Delivery Box books: " + this.box.getBoxBooks());
+        this.deliveryBoxLabel.setBounds(10, 60, 150, 30);
+        tickPanel.add(this.deliveryBoxLabel);
+
+        this.customerWaitingMeanLabel = new JLabel("Customer waiting mean time: " + this.bookStore.getCustomerWaitingTimeMean());
+        this.customerWaitingMeanLabel.setBounds(10, 90, 250, 30);
+        tickPanel.add(this.customerWaitingMeanLabel);
 
         frame.add(tickPanel);
 
+        // BOX books info
+
+        JPanel boxPanel = new JPanel();
+        boxPanel.setBounds(300,0,300,200);
+        boxPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        boxPanel.setLayout(new GridLayout(4, 2));
+
+        JLabel titleLabel = new JLabel("Delivery Box: ");
+        titleLabel.setBounds(10, 0, 300, 40);
+        boxPanel.add(titleLabel);
+        JLabel emptyLabel = new JLabel("");
+        emptyLabel.setBounds(10, 0, 300, 40);
+        boxPanel.add(emptyLabel);
+
+        this.deliveryBoxLabels = new HashMap<>();
+        Integer deliveryBoxLabelY = 0;
+        for(BookCategory category : this.categories) {
+            Integer stock = this.box.getBookByCategory(category);
+
+            JLabel categoryBoxLabel = new JLabel(category + ": " + stock);
+            categoryBoxLabel.setBounds(10, deliveryBoxLabelY, 150, 40);
+            boxPanel.add(categoryBoxLabel);
+            this.deliveryBoxLabels.put(category, categoryBoxLabel);
+            deliveryBoxLabelY = deliveryBoxLabelY + 40;
+        }
+
+        frame.add(boxPanel);
+
+        // PAUSE/RESUME BUTTONS
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.GRAY);
-        buttonPanel.setBounds(0,660,1000,150);
+        buttonPanel.setBounds(250,650,750,150);
         buttonPanel.setLayout(null);
 
-        stopButton = new JButton();
-        stopButton.setBounds(150,35,150,50);
-        stopButton.addActionListener(e -> this.timer.pauseTimer());
-        stopButton.setText("Pause Clock");
-        stopButton.setFocusable(false);
+        stopResumeButton = new JButton();
+        stopResumeButton.setBounds(250,35,200,50);
+        stopResumeButton.addActionListener(e -> this.timer.pauseResumeTimer());
+        stopResumeButton.setText("Pause/Resume Clock");
+        stopResumeButton.setFocusable(false);
 
-        buttonPanel.add(stopButton);
-
-        resumetButton = new JButton();
-        resumetButton.setBounds(450,35,150,50);
-        resumetButton.addActionListener(e -> this.timer.resumeTimer());
-        resumetButton.setText("Resume Clock");
-        resumetButton.setFocusable(false);
-
-        buttonPanel.add(resumetButton);
+        buttonPanel.add(stopResumeButton);
 
         frame.add(buttonPanel);
 
         // ASSISTANT
 
         this.assistantStatusLabel = new HashMap<>();
+        this.assistantStatusPanels = new HashMap<>();
 
-        JPanel assistantPanel = new JPanel();
-        assistantPanel.setBounds(650,110,350,330);
-        assistantPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        assistantPanel.setLayout(null);
 
-        frame.add(assistantPanel);
-        this.assistantStatusPanels = assistantPanel;
 
-        Integer assistantStatusPanelY = 0;
+        Integer assistantStatusPanelY = 150;
         for (Assistant assistant : assistantList) {
+            Map<String, JLabel> assistantPanelLabels = new HashMap<>();
+
+            JPanel assistantPanel = new JPanel();
+            assistantPanel.setBounds(650,assistantStatusPanelY,350,50);
+            assistantPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+            assistantPanel.setLayout(null);
+
             AssistantStatus status = assistant.getStatus();
+            BookCategory section = assistant.getSection();
 
-            JLabel assistantStatusLabel = new JLabel(assistant.getName() + ": " + status);
-            assistantStatusLabel.setBounds(10,assistantStatusPanelY,250,30);
+            JLabel assistantTitleLabel = new JLabel(assistant.getName() + ": ");
+            assistantTitleLabel.setBounds(10,0,100,20);
+            assistantPanel.add(assistantTitleLabel);
+            assistantPanelLabels.put("Title", assistantTitleLabel);
+
+            JLabel assistantStatusLabel = new JLabel("" + (section != null ? section : "") + status);
+            assistantStatusLabel.setBounds(110,0,250,20);
             assistantPanel.add(assistantStatusLabel);
-            this.assistantStatusLabel.put(assistant, assistantStatusLabel);
+            assistantPanelLabels.put("Status", assistantStatusLabel);
 
-            assistantStatusPanelY = assistantStatusPanelY + 30;
+            JLabel assistantBreakLabel = new JLabel("Time on break: " + assistant.getBreakTime());
+            assistantBreakLabel.setBounds(10,20,250,20);
+            assistantPanel.add(assistantBreakLabel);
+            assistantPanelLabels.put("Break", assistantBreakLabel);
+
+            this.assistantStatusLabel.put(assistant, assistantPanelLabels);
+            this.assistantStatusPanels.put(assistant, assistantPanel);
+
+            frame.add(assistantPanel);
+            assistantStatusPanelY = assistantStatusPanelY + 50;
         }
 
     }
@@ -164,16 +223,32 @@ public class GUI implements Runnable {
                 sectionLabel.get("Queue").setText("Queue: " + this.bookStore.getSectionQueue(category));
                 sectionLabel.get("Books").setText("Books in stock: " + this.bookStore.getSectionBooks(category));
                 sectionLabel.get("BooksSold").setText("Books sold: " + this.bookStore.getSoldSectionBooks(category));
+
+                double sectionMean = this.bookStore.getSectionCustomerWaitingTime(category);
+                String sectionMeanString = String.format("%.2f", sectionMean);
+                sectionLabel.get("QueueStatistics").setText("Queue waiting time: " + sectionMeanString);
+
+                // delivery box
+                Integer stock = this.box.getBookByCategory(category);
+                this.deliveryBoxLabels .get(category).setText(category + ": " + stock);
             }
 
             for (Assistant assistant : assistantList) {
                 AssistantStatus status = assistant.getStatus();
+                BookCategory section = assistant.getSection();
 
-                JLabel assistantStatusLabel = this.assistantStatusLabel.get(assistant);
-                assistantStatusLabel.setText(assistant.getName() + ": " + status);
+                Map<String, JLabel> assistantPanelLabels = this.assistantStatusLabel.get(assistant);
+                assistantPanelLabels.get("Status").setText("" + (section != null ? section : "") + " " + status);
+                assistantPanelLabels.get("Break").setText("Time on break: " + assistant.getBreakTime());
             }
 
             this.ticksLabel.setText("Clock(in ticks): " + this.timer.getTicks());
+            this.jobsLabel.setText("Jobs running: " + this.timer.getNumberOfJobs());
+            this.deliveryBoxLabel.setText("Delivery Box books: " + this.box.getBoxBooks());
+
+            double mean = this.bookStore.getCustomerWaitingTimeMean();
+            String meanString = String.format("%.2f", mean);
+            this.customerWaitingMeanLabel.setText("Customer waiting mean time: " + meanString);
         }, this.tickDuration, this.tickDuration, TimeUnit.MILLISECONDS); //delay, time, time unit
     }
 

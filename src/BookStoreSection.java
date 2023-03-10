@@ -9,6 +9,7 @@ public class BookStoreSection {
     private Integer soldBooks;
     private BookStoreSection nextSection = null;
     private Object assistantLock = new Object();
+    private double sectionWaitingTime;
 
     public BookStoreSection (Timer timer, Integer shelfCapacity) {
         this.timer = timer;
@@ -18,6 +19,22 @@ public class BookStoreSection {
         this.queue = 0;
         this.soldBooks = 0;
         this.shelfCapacity = shelfCapacity;
+        // base class never initialized and not runnable, but child classes bookstoresections are runnables
+        this.timer.increaseNumberOfJobs();
+        this.sectionWaitingTime = 0;
+    }
+    public void setSectionCustomerWaitingTime (BookCategory category ,Integer waitingTime) {
+        if(this.nextSection != null) {
+            this.nextSection.setSectionCustomerWaitingTime(category, waitingTime);
+        }
+    }
+
+    public double getSectionCustomerWaitingTime (BookCategory category) {
+        if(this.nextSection != null) {
+            return this.nextSection.getSectionCustomerWaitingTime(category);
+        }
+
+        return 0;
     }
 
     public BookCategory getBookStoreSectionCategory () {
@@ -87,8 +104,6 @@ public class BookStoreSection {
 
     public void stockBook (Book bookDelivered, Assistant assistant){
         try {
-            System.out.println(this.getBookStoreSectionCategory() + ": Currently Stocking Book.");
-
             synchronized (assistantLock) {
                 while (this.shelf.size() == this.shelfCapacity ) {
                     assistant.setStatus(AssistantStatus.QUEUE_SECTION_FULL);
@@ -101,15 +116,12 @@ public class BookStoreSection {
                 this.shelf.add(bookDelivered);
                 notify();
             }
-
-            System.out.println(assistant.getName() + ": " + this.getBookStoreSectionCategory() + " books stocked! ");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void buyBook ( ){
-        System.out.println(this.getBookStoreSectionCategory() + ": Client In!");
         try {
             synchronized (this) {
                 if (shelf.size() == 0) {
@@ -132,10 +144,17 @@ public class BookStoreSection {
             synchronized (assistantLock){
                 assistantLock.notify();
             }
-
-            System.out.println(this.getBookStoreSectionCategory() + ": Books sold! " + this.getStock());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public synchronized void setCustomerWaitingTime (Integer waitingTime) {
+        this.sectionWaitingTime = this.sectionWaitingTime + waitingTime;
+    }
+
+    public synchronized double getCustomerWaitingTime () {
+        // sold books represent also the amount of customers by section
+        return this.sectionWaitingTime / this.soldBooks;
     }
 }
