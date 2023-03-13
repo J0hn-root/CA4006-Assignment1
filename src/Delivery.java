@@ -1,3 +1,4 @@
+import java.security.SecureRandom;
 import java.util.*;
 
 public class Delivery implements Runnable {
@@ -77,16 +78,17 @@ public class Delivery implements Runnable {
     public void run() {
         try {
             while (true) {
-                Random randomGen = new Random();
-                Integer intervalDelivery = 2 * randomGen.nextInt(this.bookDeliveryInterval);
+                SecureRandom secureRandomGen = new SecureRandom();
+                Integer intervalDelivery = 2 * secureRandomGen.nextInt(this.bookDeliveryInterval);
+
                 timer.waitTicks(intervalDelivery);
 
                 List<Book> deliveredBooks = new ArrayList<>();
                 BookCategory[] categories = BookCategory.values();
                 for(int i = 0; i < 10; i++){
+                    SecureRandom secureRandom = new SecureRandom();
+                    Integer probability = secureRandom.nextInt(totalProbabilities);
 
-                    Random random = new Random();
-                    Integer probability = random.nextInt(totalProbabilities);
                     BookCategory bookCategory = null;
 
                     // based on the delivery behaviour probabilities assigned create a random category

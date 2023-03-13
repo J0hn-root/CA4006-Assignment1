@@ -1,6 +1,5 @@
-import java.sql.Time;
+import java.security.SecureRandom;
 import java.util.Map;
-import java.util.Random;
 
 public class Client implements Runnable {
 
@@ -19,8 +18,9 @@ public class Client implements Runnable {
 
         BookCategory[] categories = BookCategory.values();
 
-        Random random = new Random();
-        Integer probability = random.nextInt(totalProbabilities);
+        SecureRandom secureRandom = new SecureRandom();
+        Integer probability = secureRandom.nextInt(totalProbabilities);
+
 
         // based on the client behaviour probabilities assigned create a random category
         for (BookCategory category : categories) {

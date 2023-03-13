@@ -9,6 +9,7 @@
 
  */
 
+import java.security.SecureRandom;
 import java.util.*;
 
 public class Assistant implements Runnable {
@@ -69,8 +70,8 @@ public class Assistant implements Runnable {
         try {
             while (true) {
                 // 10% probability (by default) that the assistant will go in break for 150 ticks
-                Random random = new Random();
-                Integer probability = random.nextInt(100);
+                SecureRandom secureRandom = new SecureRandom();
+                Integer probability = secureRandom.nextInt(100);
                 if (probability >= (100 - this.BREAK_PROBABILITY)){
                     this.setStatus(AssistantStatus.ON_BREAK);
                     // <Tick count> <Thread ID> Assistant-3 is taking a break for 150 TICKS

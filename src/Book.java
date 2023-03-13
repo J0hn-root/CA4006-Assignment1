@@ -1,4 +1,4 @@
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class Book {
     private BookCategory category;
@@ -9,8 +9,9 @@ public class Book {
 
     public Book() {
         BookCategory[] categories = BookCategory.values();
-        Random random = new Random();
-        BookCategory randomCategory = categories[random.nextInt(categories.length)];
+        SecureRandom secureRandom = new SecureRandom();
+        BookCategory randomCategory = categories[secureRandom.nextInt(categories.length)];
+
 
         this.category = randomCategory;
     }

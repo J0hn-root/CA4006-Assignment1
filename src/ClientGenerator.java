@@ -7,9 +7,9 @@
 
  */
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class ClientGenerator implements Runnable {
 
@@ -85,8 +85,8 @@ public class ClientGenerator implements Runnable {
     public void run() {
         try {
             while (true) {
-                Random randomGen = new Random();
-                Integer intervalClientGeneration = 2 * randomGen.nextInt(this.clientGenerationInterval);
+                SecureRandom secureRandomGen = new SecureRandom();
+                Integer intervalClientGeneration = 2 * secureRandomGen.nextInt(this.clientGenerationInterval);
                 timer.waitTicks(intervalClientGeneration);
 
                 Integer clientNumber = this.bookStore.getClientNumber();
