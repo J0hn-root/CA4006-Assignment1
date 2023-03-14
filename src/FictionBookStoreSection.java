@@ -1,7 +1,7 @@
 public class FictionBookStoreSection extends BookStoreSection{
 
-    public FictionBookStoreSection (Timer timer, Integer shelfCapacity) {
-        super(timer, shelfCapacity);
+    public FictionBookStoreSection (Timer timer, Box box, Integer shelfCapacity) {
+        super(timer, box, shelfCapacity);
     }
 
     @Override

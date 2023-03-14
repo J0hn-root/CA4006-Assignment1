@@ -48,8 +48,9 @@ public class Main {
         this.BOOK_DELIVERY_BEHAVIOUR = !deliveryBooksBehaviour.isEmpty() ? deliveryBooksBehaviour : this.BOOK_DELIVERY_BEHAVIOUR;
 
         this.timer = new Timer(this.TICK_DURATION);
-        this.bookStore = new BookStore(this.timer, this.SHELF_CAPACITY);
+        this.bookStore = new BookStore(this.timer);
         this.box = new Box(this.bookStore, this.SHELF_CAPACITY);
+        this.bookStore.SetResponsibilityChain(this.box, this.SHELF_CAPACITY);
 
         Runnable delivery = new Delivery(this.BOOK_DELIVERY_INTERVAL, this.timer, this.box, this.BOOK_DELIVERY_BEHAVIOUR);
         Runnable clientGenerator = new ClientGenerator(this.CLIENT_INTERVAL, this.timer, this.bookStore, this.CLIENT_PURCHASE_BEHAVIOUR);

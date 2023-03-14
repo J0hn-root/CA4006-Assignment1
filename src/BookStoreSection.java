@@ -10,8 +10,9 @@ public class BookStoreSection {
     private BookStoreSection nextSection = null;
     private Object assistantLock = new Object();
     private double sectionWaitingTime;
+    private Box box;
 
-    public BookStoreSection (Timer timer, Integer shelfCapacity) {
+    public BookStoreSection (Timer timer, Box box, Integer shelfCapacity) {
         this.timer = timer;
         this.shelf = new ArrayList<>();
         // each section starts with a book
@@ -22,6 +23,7 @@ public class BookStoreSection {
         // base class never initialized and not runnable, but child classes bookstoresections are runnables
         this.timer.increaseNumberOfJobs();
         this.sectionWaitingTime = 0;
+        this.box = box;
     }
     public void setSectionCustomerWaitingTime (BookCategory category ,Integer waitingTime) {
         if(this.nextSection != null) {
@@ -140,6 +142,9 @@ public class BookStoreSection {
                     throw new RuntimeException(e);
                 }
             }
+
+            // notify assistant that books have been sold
+            this.box.bookSold();
 
             synchronized (assistantLock){
                 assistantLock.notify();

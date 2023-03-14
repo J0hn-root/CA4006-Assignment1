@@ -35,6 +35,11 @@ public class Box {
         return totalBooks;
     }
 
+    // notify assistants waiting that books have been sold and to check if books must be retrieved
+    public synchronized void bookSold (){
+        notify();
+    }
+
     public synchronized void deliverBooks (List<Book> booksDelivered){
         for(Book book: booksDelivered){
             List<Book> listBooks = this.box.get(book.getCategory());

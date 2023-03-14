@@ -9,8 +9,7 @@ public class BookStore {
     private Map<BookCategory, Integer> booksIssued;
     private Object booksIssuedLock = new Object();
 
-
-    public BookStore (Timer timer, Integer shelfCapacity) {
+    public BookStore (Timer timer) {
         this.booksIssued = new HashMap<>();
 
         // initialize
@@ -18,19 +17,22 @@ public class BookStore {
             this.booksIssued.put(category, 0);
         }
 
-        BookStoreSection firstSectioninChain = new FictionBookStoreSection(timer, shelfCapacity);
-
-        firstSectioninChain
-                .setNextBookStoreSectionInChain(new HorrorBookStoreSection(timer, shelfCapacity))
-                .setNextBookStoreSectionInChain(new RomanceBookStoreSection(timer, shelfCapacity))
-                .setNextBookStoreSectionInChain(new FantasyBookStoreSection(timer, shelfCapacity))
-                .setNextBookStoreSectionInChain(new PoetryBookStoreSection(timer, shelfCapacity))
-                .setNextBookStoreSectionInChain(new HistoryBookStoreSection(timer, shelfCapacity));
-
-        this.firstSectonInChain = firstSectioninChain;
         this.timer = timer;
         this.totalCustomers = 0;
         this.totalWaitingTime = 0;
+    }
+
+    public void SetResponsibilityChain(Box box, Integer shelfCapacity) {
+        BookStoreSection firstSectioninChain = new FictionBookStoreSection(timer, box, shelfCapacity);
+
+        firstSectioninChain
+                .setNextBookStoreSectionInChain(new HorrorBookStoreSection(timer, box, shelfCapacity))
+                .setNextBookStoreSectionInChain(new RomanceBookStoreSection(timer, box, shelfCapacity))
+                .setNextBookStoreSectionInChain(new FantasyBookStoreSection(timer, box, shelfCapacity))
+                .setNextBookStoreSectionInChain(new PoetryBookStoreSection(timer, box, shelfCapacity))
+                .setNextBookStoreSectionInChain(new HistoryBookStoreSection(timer, box, shelfCapacity));
+
+        this.firstSectonInChain = firstSectioninChain;
     }
 
     public void setBooksIssued (BookCategory category, Integer value) {

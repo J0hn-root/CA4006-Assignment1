@@ -1,7 +1,7 @@
 public class PoetryBookStoreSection extends BookStoreSection{
 
-    public PoetryBookStoreSection (Timer timer, Integer shelfCapacity) {
-        super(timer, shelfCapacity);
+    public PoetryBookStoreSection (Timer timer, Box box, Integer shelfCapacity) {
+        super(timer, box, shelfCapacity);
     }
 
     @Override
