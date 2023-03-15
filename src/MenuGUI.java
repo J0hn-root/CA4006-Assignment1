@@ -43,10 +43,10 @@ public class MenuGUI {
 
         instructionBehaviourLabel = new JLabel("Behaviour categories order (fields below), 6 values required =>");
         instructionCategoriesBehaviourLabel = new JLabel("FANTASY; FICTION; HISTORY; HORROR; POETRY; ROMANCE ");
-        bookCategoryDeliveryBehaviourLabel = new JLabel("Book categories delivery behaviour (e.g. -> 50;20;10;70;90;100 ):");
+        bookCategoryDeliveryBehaviourLabel = new JLabel("Book categories delivery behaviour (e.g. -> 5;2;1;7;9;10 ):");
         bookCategoryDeliveryBehaviourField = new JTextField();
 
-        customerPurchaseBehaviourLabel = new JLabel("Probabilities of customer purchase behaviour (e.g. -> 50;20;10;70;90;100 ):");
+        customerPurchaseBehaviourLabel = new JLabel("Probabilities of customer purchase behaviour (e.g. -> 5;2;1;7;9;10 ):");
         customerPurchaseBehaviourField = new JTextField();
 
         JButton button = new JButton("Start");

@@ -25,28 +25,6 @@ public class BookStoreSection {
         this.sectionWaitingTime = 0;
         this.box = box;
     }
-    public void setSectionCustomerWaitingTime (BookCategory category ,Integer waitingTime) {
-        if(this.nextSection != null) {
-            this.nextSection.setSectionCustomerWaitingTime(category, waitingTime);
-        }
-    }
-
-    public double getSectionCustomerWaitingTime (BookCategory category) {
-        if(this.nextSection != null) {
-            return this.nextSection.getSectionCustomerWaitingTime(category);
-        }
-
-        return 0;
-    }
-
-    public BookCategory getBookStoreSectionCategory () {
-        return null;
-    }
-
-    public BookStoreSection setNextBookStoreSectionInChain(BookStoreSection section) {
-        this.nextSection = section;
-        return section;
-    }
 
     public void getSectionAndBuyBook (BookCategory category) {
         if(this.nextSection != null) {
@@ -84,6 +62,29 @@ public class BookStoreSection {
         return null;
     }
 
+    public void setSectionCustomerWaitingTime (BookCategory category ,Integer waitingTime) {
+        if(this.nextSection != null) {
+            this.nextSection.setSectionCustomerWaitingTime(category, waitingTime);
+        }
+    }
+
+    public double getSectionCustomerWaitingTime (BookCategory category) {
+        if(this.nextSection != null) {
+            return this.nextSection.getSectionCustomerWaitingTime(category);
+        }
+
+        return 0;
+    }
+
+    public BookCategory getBookStoreSectionCategory () {
+        return null;
+    }
+
+    public BookStoreSection setNextBookStoreSectionInChain(BookStoreSection section) {
+        this.nextSection = section;
+        return section;
+    }
+
     public synchronized Integer getStock() {
         return this.shelf.size();
     }
@@ -104,6 +105,8 @@ public class BookStoreSection {
         return this.soldBooks;
     }
 
+    // the method is not synchronized because for fairness i tried to minimize the amount of time
+    // a thread will be in the critical section (atomicity)
     public void stockBook (Book bookDelivered, Assistant assistant){
         try {
             synchronized (assistantLock) {
@@ -123,6 +126,8 @@ public class BookStoreSection {
         }
     }
 
+    // the method is not synchronized because for fairness i tried to minimize the amount of time
+    // a thread will be in the critical section (atomicity)
     public void buyBook ( ){
         try {
             synchronized (this) {
@@ -134,13 +139,8 @@ public class BookStoreSection {
             }
 
             synchronized (this) {
-                try {
-                    this.shelf.remove(0);
-                    this.soldBooks++;
-                } catch (Exception e) {
-                    System.out.println(shelf.size());
-                    throw new RuntimeException(e);
-                }
+                this.shelf.remove(0);
+                this.soldBooks++;
             }
 
             // notify assistant that books have been sold

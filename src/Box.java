@@ -55,7 +55,7 @@ public class Box {
     }
 
     // the method is not synchronized because for fairness i tried to minimize the amount of time
-    // a thread will be in the critical section
+    // a thread will be in the critical section (atomicity)
     public Map<BookCategory, List<Book>> retrieveBooks (Assistant assistant){
         try {
             // object to be returned

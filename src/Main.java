@@ -17,11 +17,11 @@ public class Main {
     private static final int BOOKS_CARRYING_TIME = 10; //in ticks
     private static final int SECTION_CARRYING_TIME_PER_BOOK = 1; //in ticks
     private static int CLIENT_INTERVAL = 10; //in ticks
-    private static int NUMBER_OF_ASSISTANTS = 3;
+    private static int NUMBER_OF_ASSISTANTS = 2;
     private static int SHELF_CAPACITY = 10;
     // default all categories equally possible
-    private static String CLIENT_PURCHASE_BEHAVIOUR = "100;100;100;100;100;100"; // FANTASY;FICTION;HISTORY;HORROR;POETRY;FANTASY
-    private static String BOOK_DELIVERY_BEHAVIOUR = "100;100;100;100;100;100"; // FANTASY;FICTION;HISTORY;HORROR;POETRY;FANTASY
+    private static String CLIENT_PURCHASE_BEHAVIOUR = "1;1;1;1;1;1"; // FANTASY;FICTION;HISTORY;HORROR;POETRY;FANTASY
+    private static String BOOK_DELIVERY_BEHAVIOUR = "1;1;1;1;1;1"; // FANTASY;FICTION;HISTORY;HORROR;POETRY;FANTASY
 
     public Main () {
     }
