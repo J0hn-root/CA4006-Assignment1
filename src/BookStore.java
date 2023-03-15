@@ -2,7 +2,7 @@ import java.util.*;
 
 public class BookStore {
     private static Timer timer;
-    private BookStoreSection firstSectonInChain;
+    private BookStoreSection firstSectionInChain;
     private Integer totalCustomers;
     private double totalWaitingTime;
     // takes count of the number of books the assistants are carrying for optimising prioritization
@@ -23,16 +23,44 @@ public class BookStore {
     }
 
     public void SetResponsibilityChain(Box box, Integer shelfCapacity) {
-        BookStoreSection firstSectioninChain = new FictionBookStoreSection(timer, box, shelfCapacity);
+        BookStoreSection firstSectionInChain = new FictionBookStoreSection(timer, box, shelfCapacity);
 
-        firstSectioninChain
+        firstSectionInChain
                 .setNextBookStoreSectionInChain(new HorrorBookStoreSection(timer, box, shelfCapacity))
                 .setNextBookStoreSectionInChain(new RomanceBookStoreSection(timer, box, shelfCapacity))
                 .setNextBookStoreSectionInChain(new FantasyBookStoreSection(timer, box, shelfCapacity))
                 .setNextBookStoreSectionInChain(new PoetryBookStoreSection(timer, box, shelfCapacity))
                 .setNextBookStoreSectionInChain(new HistoryBookStoreSection(timer, box, shelfCapacity));
 
-        this.firstSectonInChain = firstSectioninChain;
+        this.firstSectionInChain = firstSectionInChain;
+    }
+
+    public void buyBook(BookCategory category) {
+        this.firstSectionInChain.getSectionAndBuyBook(category);
+    }
+
+    public void stockBooks(BookCategory category, Book book, Assistant assistant) {
+        this.firstSectionInChain.getSectionAndStockBooks(category, book, assistant);
+    }
+
+    public Integer getSectionQueue(BookCategory category) {
+        return this.firstSectionInChain.getSectionQueue(category);
+    }
+
+    public Integer getSectionBooks(BookCategory category) {
+        return this.firstSectionInChain.getSectionBooks(category);
+    }
+
+    public Integer getSoldSectionBooks(BookCategory category) {
+        return this.firstSectionInChain.getSoldSectionBooks(category);
+    }
+
+    public double getSectionCustomerWaitingTime(BookCategory category) {
+        return this.firstSectionInChain.getSectionCustomerWaitingTime(category);
+    }
+
+    public void setSectionCustomerWaitingTime (BookCategory category, Integer waitingTime) {
+        this.firstSectionInChain.setSectionCustomerWaitingTime(category, waitingTime);
     }
 
     public void setBooksIssued (BookCategory category, Integer value) {
@@ -65,34 +93,6 @@ public class BookStore {
 
     public synchronized Integer getClientNumber () {
         return this.totalCustomers++;
-    }
-
-    public void buyBook(BookCategory category) {
-        this.firstSectonInChain.getSectionAndBuyBook(category);
-    }
-
-    public void stockBooks(BookCategory category, Book book, Assistant assistant) {
-        this.firstSectonInChain.getSectionAndStockBooks(category, book, assistant);
-    }
-
-    public Integer getSectionQueue(BookCategory category) {
-        return this.firstSectonInChain.getSectionQueue(category);
-    }
-
-    public Integer getSectionBooks(BookCategory category) {
-        return this.firstSectonInChain.getSectionBooks(category);
-    }
-
-    public Integer getSoldSectionBooks(BookCategory category) {
-        return this.firstSectonInChain.getSoldSectionBooks(category);
-    }
-
-    public double getSectionCustomerWaitingTime(BookCategory category) {
-        return this.firstSectonInChain.getSectionCustomerWaitingTime(category);
-    }
-
-    public void setSectionCustomerWaitingTime (BookCategory category, Integer waitingTime) {
-        this.firstSectonInChain.setSectionCustomerWaitingTime(category, waitingTime);
     }
 
     public void prioritiseSectionDelivery (List<BookCategory> categories) {

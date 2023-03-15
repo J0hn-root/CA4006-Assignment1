@@ -20,7 +20,7 @@ public class BookStoreSection {
         this.queue = 0;
         this.soldBooks = 0;
         this.shelfCapacity = shelfCapacity;
-        // base class never initialized and not runnable, but child classes bookstoresections are runnables
+        // base class never initialized and not runnable, but child classes bookstore-sections are runnable
         this.timer.increaseNumberOfJobs();
         this.sectionWaitingTime = 0;
         this.box = box;

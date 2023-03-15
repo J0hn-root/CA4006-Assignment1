@@ -26,6 +26,7 @@ public class Main {
     public Main () {
     }
 
+    //invoked by MenuGUI, initializes GUI, necessary threads and storing object
     public void start(String tickDuration, String bookDeliveryInterval , String clientInterval, String numberOfAssistants,
                       String shelfCapacity, String deliveryBooksBehaviour, String clientBehaviour) {
 
@@ -50,6 +51,8 @@ public class Main {
         this.timer = new Timer(this.TICK_DURATION);
         this.bookStore = new BookStore(this.timer);
         this.box = new Box(this.bookStore, this.SHELF_CAPACITY);
+
+        // create responsibility chain
         this.bookStore.SetResponsibilityChain(this.box, this.SHELF_CAPACITY);
 
         Runnable delivery = new Delivery(this.BOOK_DELIVERY_INTERVAL, this.timer, this.box, this.BOOK_DELIVERY_BEHAVIOUR);
@@ -64,7 +67,7 @@ public class Main {
         }
         Runnable gui = new GUI(this.bookStore, this.timer, this.box, this.assistantList, this.TICK_DURATION);
 
-        this.timer.start();
+        new Thread(this.timer).start();
         new Thread(gui).start();
         new Thread(delivery).start();
         new Thread(clientGenerator).start();
@@ -76,6 +79,6 @@ public class Main {
 
     public static void main(String[] args) {
         Main main = new Main();
-        MenuGUI menu = new MenuGUI(main);
+        new MenuGUI(main);
     }
 }

@@ -2,12 +2,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Timer {
+public class Timer implements Runnable{
 
     private  ScheduledExecutorService scheduler;
     private int tickDuration; // tick duration in milliseconds
     private volatile int ticks;
-    private Object lock = new Object();
     private Boolean pause;
     private Integer numberOfJobs;
 
@@ -20,21 +19,34 @@ public class Timer {
         this.numberOfJobs = 1;
     }
 
-    public void start() {
+    public void run() {
+        // runs every fix amount of time, increases the current tick and notifies all waiting threads
         this.scheduler.scheduleAtFixedRate(() -> {
             if (!pause) {
-                //System.out.println("Ticks: "+ this.ticks);
-                synchronized (lock) {
+                synchronized (this) {
                     this.ticks++;
-                    lock.notifyAll();
+                    notifyAll();
                 }
             }
         }, this.tickDuration, this.tickDuration, TimeUnit.MILLISECONDS); //delay, time, time unit
     }
 
-    public String getThreadName() {
-        return  Thread.currentThread().getName();
+    // pauses the requesting thread for n amounts of ticks
+    public void waitTicks(Integer nTicksToWait) throws InterruptedException {
+        Integer stopTicks;
+        if (nTicksToWait > 0) {
+            synchronized (this) {
+                stopTicks = ticks + nTicksToWait;
+            }
+
+            synchronized (this) {
+                while (ticks < stopTicks) {
+                    wait();
+                }
+            }
+        }
     }
+
     public synchronized void increaseNumberOfJobs () {
         this.numberOfJobs++;
     }
@@ -55,25 +67,8 @@ public class Timer {
         this.pause = !this.pause;
     }
 
-    public int getTicks() {
-        synchronized (lock) {
-            return this.ticks;
-        }
-    }
-
-    public void waitTicks(Integer nTicksToWait) throws InterruptedException {
-        Integer stopTicks;
-        if (nTicksToWait > 0) {
-            synchronized (lock) {
-                stopTicks = ticks + nTicksToWait;
-            }
-
-            synchronized (lock) {
-                while (ticks < stopTicks) {
-                    lock.wait();
-                }
-            }
-        }
+    public synchronized int getTicks() {
+        return this.ticks;
     }
 
 }

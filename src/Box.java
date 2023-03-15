@@ -9,19 +9,24 @@ public class Box {
     public Box (BookStore bookStore, Integer shelfCapacity) {
         this.box = new HashMap<>();
         this.bookStore = bookStore;
+
+        // shelf capacity is used to stop Assistants from carrying books to section with full shelves
         this.shelfCapacity = shelfCapacity;
 
+        // initialize box hash map
         for (BookCategory category : BookCategory.values()) {
             List<Book> listBooks = new ArrayList<>();
             this.box.put(category, listBooks);
         }
     }
 
+    // get the amount of books for a certain category in the delivery box
     public synchronized Integer getBookByCategory (BookCategory category) {
         List<Book> categoryBook = this.box.get(category);
         return categoryBook.size();
     }
 
+    // get total amount of books in the delivery box
     public Integer getBoxBooks (){
         return getBoxTotalBooks();
     }
@@ -40,6 +45,7 @@ public class Box {
         notify();
     }
 
+    // deliver books
     public synchronized void deliverBooks (List<Book> booksDelivered){
         for(Book book: booksDelivered){
             List<Book> listBooks = this.box.get(book.getCategory());
@@ -48,6 +54,8 @@ public class Box {
         notify();
     }
 
+    // the method is not synchronized because for fairness i tried to minimize the amount of time
+    // a thread will be in the critical section
     public Map<BookCategory, List<Book>> retrieveBooks (Assistant assistant){
         try {
             // object to be returned
@@ -95,7 +103,8 @@ public class Box {
                         }
                     }
 
-
+                    // if 10 books have been collected exit loop
+                    // just for safety measure
                     if (bookCollected == 10) {
                         break;
                     }
